@@ -10,6 +10,17 @@ var pluginName = 'VideoEditor';
 
 function VideoEditor() {}
 
+VideoEditor.prototype.compressVideo = function(success, error, options) {
+  var self = this;
+
+  console.log(self);
+
+  var win = function(result) {
+      success(result);
+  };
+  exec(win, error, pluginName, 'compressVideo', [options]);
+};
+
 VideoEditor.prototype.transcodeVideo = function(success, error, options) {
   var self = this;
   var win = function(result) {
