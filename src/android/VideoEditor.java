@@ -43,6 +43,8 @@ public class VideoEditor extends CordovaPlugin {
     private static final String TAG = "VideoEditor";
     public static Context ctx;
 
+    private static int height, width, videoBitrate;
+
     private CallbackContext callback;
 
     @Override
@@ -88,6 +90,10 @@ public class VideoEditor extends CordovaPlugin {
         VideoCompressAsyncTask vcat = new VideoCompressAsyncTask(ctx);
 
         try {
+            height = options.optInt("height", 640);
+            width = options.optInt("width", 480);
+            videoBitrate = options.optInt("videoBitrate", 0);
+
             final File inFile = this.resolveLocalFileSystemURI(options.getString("fileUri"));
             vcat.execute(inFile.getAbsolutePath(), inFile.getAbsolutePath());
         } catch (IOException e) {
@@ -110,7 +116,7 @@ public class VideoEditor extends CordovaPlugin {
             String filePath = null;
             try {
 
-                filePath = SiliCompressor.with(mContext).compressVideo(paths[0], paths[1], 480, 640, 0);
+                filePath = SiliCompressor.with(mContext).compressVideo(paths[0], paths[1], width, height, videoBitrate);
 
             } catch (URISyntaxException e) {
                 e.printStackTrace();
