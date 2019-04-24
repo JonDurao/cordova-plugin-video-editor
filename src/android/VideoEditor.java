@@ -116,31 +116,25 @@ public class VideoEditor extends CordovaPlugin {
             String filePath = null;
             try {
 
-                filePath = SiliCompressor.with(mContext).compressVideo(paths[0], paths[1], width, height, videoBitrate);
-                callback.success(filePath);
+                filePath = SiliCompressor.with(mContext).compressVideo(
+                        paths[0],
+                        paths[1].substring(0, paths[1].lastIndexOf("/")) + "/",
+                        height,
+                        width,
+                        videoBitrate);
 
-                return filePath;
             } catch (URISyntaxException e) {
                 e.printStackTrace();
                 callback.error(e.getMessage());
             }
 
-            return null;
+            return filePath;
         }
 
 
         @Override
         protected void onPostExecute(String compressedFilePath) {
-            super.onPostExecute(compressedFilePath);
-
-            File imageFile = new File(compressedFilePath);
-            float length = imageFile.length() / 1024f; // Size in KB
-            String value;
-
-            if (length >= 1024)
-                value = length / 1024f + " MB";
-            else
-                value = length + " KB";
+            callback.success(compressedFilePath);
 
             Log.i("Silicompressor", "Path: " + compressedFilePath);
         }
