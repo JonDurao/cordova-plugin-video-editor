@@ -1,6 +1,7 @@
 package org.apache.cordova.videoeditor;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
@@ -24,13 +25,14 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import net.ypresto.androidtranscoder.MediaTranscoder;
+import com.iceteck.silicompressorr.SiliCompressor;
 
 /**
  * VideoEditor plugin for Android
@@ -39,6 +41,7 @@ import net.ypresto.androidtranscoder.MediaTranscoder;
 public class VideoEditor extends CordovaPlugin {
 
     private static final String TAG = "VideoEditor";
+    public static Context ctx;
 
     private CallbackContext callback;
 
@@ -48,7 +51,9 @@ public class VideoEditor extends CordovaPlugin {
 
         this.callback = callbackContext;
 
-        if (action.equals("transcodeVideo")) {
+        ctx = this.cordova.getContext();
+
+        /*if (action.equals("transcodeVideo")) {
             try {
                 this.transcodeVideo(args);
             } catch (IOException e) {
@@ -69,9 +74,67 @@ public class VideoEditor extends CordovaPlugin {
                 callback.error(e.toString());
             }
             return true;
+        } else */if (action.equals("compressVideo")) {
+            this.compressVideo(args);
+            return true;
         }
 
         return false;
+    }
+
+    private void compressVideo(JSONArray args) {
+        JSONObject options = args.optJSONObject(0);
+
+        VideoCompressAsyncTask vcat = new VideoCompressAsyncTask(ctx);
+
+        try {
+            final File inFile = this.resolveLocalFileSystemURI(options.getString("fileUri"));
+            vcat.execute(inFile.getAbsolutePath(), inFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
+
+        Context mContext;
+
+        public VideoCompressAsyncTask(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        protected String doInBackground(String... paths) {
+            String filePath = null;
+            try {
+
+                filePath = SiliCompressor.with(mContext).compressVideo(paths[0], paths[1], 480, 640, 0);
+
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+            return filePath;
+
+        }
+
+
+        @Override
+        protected void onPostExecute(String compressedFilePath) {
+            super.onPostExecute(compressedFilePath);
+
+            File imageFile = new File(compressedFilePath);
+            float length = imageFile.length() / 1024f; // Size in KB
+            String value;
+
+            if (length >= 1024)
+                value = length / 1024f + " MB";
+            else
+                value = length + " KB";
+
+            Log.i("Silicompressor", "Path: " + compressedFilePath);
+        }
     }
 
     /**
@@ -96,12 +159,9 @@ public class VideoEditor extends CordovaPlugin {
      * ========
      *
      * outputFilePath - path to output file
-     *
-     * @param JSONArray args
-     * @return void
      */
     private void transcodeVideo(JSONArray args) throws JSONException, IOException {
-        Log.d(TAG, "transcodeVideo firing");
+        /*Log.d(TAG, "transcodeVideo firing");
 
         JSONObject options = args.optJSONObject(0);
         Log.d(TAG, "options: " + options.toString());
@@ -248,7 +308,7 @@ public class VideoEditor extends CordovaPlugin {
                 }
 
             }
-        });
+        });*/
     }
 
     /**
@@ -269,9 +329,6 @@ public class VideoEditor extends CordovaPlugin {
      * ========
      *
      * outputFilePath - path to output file
-     *
-     * @param JSONArray args
-     * @return void
      */
     private void createThumbnail(JSONArray args) throws JSONException, IOException {
         Log.d(TAG, "createThumbnail firing");
@@ -402,9 +459,6 @@ public class VideoEditor extends CordovaPlugin {
      * duration      - duration of the video (in seconds)
      * size          - size of the video (in bytes)
      * bitrate       - bitrate of the video (in bits per second)
-     *
-     * @param JSONArray args
-     * @return void
      */
     private void getVideoInfo(JSONArray args) throws JSONException, IOException {
         Log.d(TAG, "getVideoInfo firing");

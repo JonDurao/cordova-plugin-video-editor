@@ -5,7 +5,7 @@ repositories{
 }
 
 dependencies {
-    implementation 'com.arthenica:mobile-ffmpeg-full:4.2.1'
+    implementation 'com.iceteck.silicompressorr:silicompressor:2.2.1'
 }
 
 android {

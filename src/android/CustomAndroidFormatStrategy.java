@@ -11,7 +11,7 @@ import net.ypresto.androidtranscoder.format.OutputFormatUnavailableException;
  *
  *
  */
-public class CustomAndroidFormatStrategy implements MediaFormatStrategy {
+public class CustomAndroidFormatStrategy /*implements MediaFormatStrategy*/ {
 
     private static final String TAG = "CustomFormatStrategy";
     private static final int DEFAULT_BITRATE = 8000000;
