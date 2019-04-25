@@ -119,8 +119,8 @@ public class VideoEditor extends CordovaPlugin {
                 filePath = SiliCompressor.with(mContext).compressVideo(
                         paths[0],
                         paths[1].substring(0, paths[1].lastIndexOf("/")) + "/",
-                        height,
                         width,
+                        height,
                         videoBitrate);
 
             } catch (URISyntaxException e) {
